@@ -1,0 +1,25 @@
+
+
+unit byte
+0: reserved
+
+1~4 Plain text A
+5~8 Plain text B
+
+9~12 Cipher text A
+13~16 Cipher text B
+
+17~32 :128 bits ukey 
+
+33~136 : s_array (skey[])
+(33 34 35 36) s[0] 32bits
+(37 38 39 40) s[1]
+..................
+(133 134 135 136) s[25]
+
+137~152 : l_array 
+(137 138 139 140)l[0] 32bits
+(141 142 143 144)l[1] 32bits
+(145 146 147 148)l[2] 32bits
+(149 150 151 152)l[3] 32bits
+
