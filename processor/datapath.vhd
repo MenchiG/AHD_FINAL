@@ -119,7 +119,7 @@ begin
 
 		s_PCplus4 <= s_PC + 4;
 
-		s_BranchPC <= s_PCplus4 + s_SignExt15to0(31 downto 0) when s_isBranchPC = '1' else
+		s_BranchPC <= s_PCplus4 + (s_SignExt15to0(29 downto 0) & "00") when s_isBranchPC = '1' else
 					  s_PCplus4;
 
 
