@@ -1,0 +1,52 @@
+for i = 12 downto 1 do
+	B11 = ((B12 - S[2×i +1]) >>> A12) xor A12;
+	A11 = ((A12 - S[2×i]) >>> B11) xor B11;
+B = B0 - S[1];        
+A = A0 - S[0];        
+A,B: plaintext
+A12,B12: ciphertext
+
+-----------------load cipher text A------------------------
+lw R1,9(R0);  //R1=Mem4[9+0]  R1=A12
+lw R2,13(R0);  //R2=B12
+-----------------load s[0]/s[1]--------------------------
+lw R3,33(R0);
+lw R4,37(R0);  //R4=s[1]
+--------------------------------------------------------
+addi R5,R0,13;  //R5=13 stores i=13
+subi R5,R5,1;   //R5=i--
+addi R6,R0,1;  //stores fixed value 1 R6=1
+shl R7, R5,3;  //R7=i<<3=2*i*4   tmp=s[2i]
+lw R8, 33(R7); //R8=Mem4[R7+33]=Mem4[129]   s[24]
+lw R9,37(R7); //R10=Mem4[R7+37]＝Mem4[133］  s[25]
+sub R10,R2,R9; //R10=B12-s[25]; 
+
+andi R11,R1,0x1F; //R11 get last 5 digt 0f A12
+beq R11,R0,30;     //if(R11==0) go to branch 30
+shr R10, R10,1;   //R10>>1
+subi R11,R11,1;  //R11--; A12--
+bne R11,R0, 26;   //if(R11!=0) go to addr 26
+--------------------xor-A12-------------------------------- 
+nor R12,R10,R0;   //R12=!(R10)
+nor R13,R1,R0;   //R13=!A12
+and R14,R1,R12;   //R14=A12&R12
+and R15,R13,R10;
+or R16,R14,R15;    //R16=X xor A12=B11
+-------------------sub&>>>-------------------------------
+sub R10,R1,R8;    //R10=A12-s[24]
+andi R11,R16,0x1F  //R11 get last 5 digit of B11
+beq R11,R0,43;    //if(R11==0) go to 43
+shr R10,R10,1;   //R10>>1
+subi R11,R11,1;  //R11--;B11--
+bne R11,R0,39;  //if(R11!=0) go to addr 39
+--------------------xor-B11-------------------------
+nor R12,R10,R0;  //R12=!R10
+nor R13,R16,R0;  //R13=!B11
+and R14,R10,R13;  //R14=R10&!B11
+and R15,R12,R16;  //R15=!R10&R16
+or R17,R14,R15;  //R17=A11
+
+bne R5,R6, -28;  //if(R5!=1) go to i--
+-----------get A&B----------------------------------
+sub R18,R16,R4;  //R18=B=B0-s[1] plaintextB
+sub R19,R17,R3;  //R19=A=A0-s[0] plaintextA
