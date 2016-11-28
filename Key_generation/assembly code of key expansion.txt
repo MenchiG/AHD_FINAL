@@ -1,0 +1,40 @@
+
+
+
+
+// initial   R5:a_reg   R6:s_array  R7:b_reg  R8:l_array  R9: control the bits of rotate   
+//  R10: i_cnt  R11 j_cnt R12: k_cnt   R13: 104(26*4)  R14:16(4*4)  R15:78
+
+
+sub  $5,$5,$5                // set all register to initial numbers 
+sub  $7,$7,$7
+sub  $12,$12,$12
+sub  $11,$11,$11
+sub  $10,$10,$10
+addi $13,$0,0x68
+addi $14,$0,0x10
+addi $15,$0,0x4e             // finish initial
+lw   $6,0x21($10)           //load S[i_cnt] from memory
+add  $5,$5,$7               
+add  $5,$5,$6               //    a+b+s[]
+shl  $5,$5,0x3            //     a_reg <<3
+lw   $8,0x89($11)           //load L[j_cnt] from mermory
+add  $7,$5,$7                // b_reg=a+b
+add  $9,$0,$7                //   R9=a+b
+add  $7,$7,$8               //   b_reg a+b+l[]
+andi $9,$9.0x1f               //   R9= R9 and 11111
+beq  $9,$0,0x3                //check if finish rotate ,  if finish ,R7=R7<<(A+B)
+shl  $7,$7,0x1              // b_reg<<1
+subi $9,$9,0x1              //  R9=R9-1
+beq  $0,$0,0xfffc           //  go to   pc-3 
+sw   $5,0x21($10)            // store the result to memory
+sw   $7,0x89($11)
+addi $10,$10,0x4           // i_cnt =i_cnt +4
+bne  $10,$13,0x1           // if not equal ,skip the process that set i_cnt = 0
+sub  $10,$10,$10             // set i_cnt = 0
+addi $11,$11,0x4           //j_cnt =j_cnt +4
+bne  $11,$14,0x1           // if not equal ,skip the process that set j_cnt = 0
+sub  $11,$11,$11             // set j_cnt = 0 
+addi $12,$12,0x1            //k_cnt =K_cnt + 1 
+bne  $12,$15,0xffe9        // if k_cnt not equal to 78, go back to the first step 
+
