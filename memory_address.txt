@@ -9,8 +9,8 @@ unit byte
 9~12  output A
 13~16 output B
 
-17  enc/dec flag
-18~32 :n reserved
+17～20  enc/dec flag 0x00000001 = dec else enc
+21~32 :n reserved
 
 33~136 : s_array (skey[])
 (33 34 35 36) s[0] 32bits
