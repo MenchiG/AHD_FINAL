@@ -36,6 +36,14 @@ entity NYU_TOP is
 	port( clk : in STD_LOGIC;
 			clr : in STD_LOGIC;
 			
+			state : in CPUStateType;
+			
+			inputRamAddr : in std_logic_vector(31 downto 0);
+			inputRamWrtData : in std_logic_vector(31 downto 0);
+			
+			ramData : out std_logic_vector(31 downto 0);
+			
+			halt : out STD_LOGIC;
 			pc_o : out STD_LOGIC_VECTOR(31 downto 0)
 			
 			);
@@ -43,11 +51,18 @@ end NYU_TOP;
 
 architecture Behavioral of NYU_TOP is
 
+		signal   cpu_clk:  std_logic;
 		
 		signal   s_Opcode:  std_logic_vector(5 downto 0);
 		signal   s_isItype:  std_logic;
 		signal   s_isLoad:  std_logic;
 		signal   s_isStore:  std_logic;
+		
+		signal   ramLoad:  std_logic;
+		signal   ramStore:  std_logic;
+		signal 	ramWrtData : std_logic_vector(31 downto 0);
+		signal 	ramAddr : std_logic_vector(31 downto 0);
+		
 		signal   s_wrtEnble:  std_logic;
 		signal   s_aluop:  std_logic_vector(2 downto 0);
 		signal   s_aluOpBSrc: std_logic;
@@ -56,7 +71,7 @@ architecture Behavioral of NYU_TOP is
 		signal 	s_ramWrtData : std_logic_vector(31 downto 0);
 		signal 	s_romData : std_logic_vector(31 downto 0);
 		signal 	s_ramAddr : std_logic_vector(31 downto 0);
-		signal 	s_romAddr : std_logic_vector(31 downto 0);
+		signal 	s_nextPC_romAddr : std_logic_vector(31 downto 0);
 		signal	s_halt : std_logic;
 		
 begin
@@ -77,21 +92,21 @@ begin
 		port map(
 			clk => clk,
 			clr => clr,
-			address_i => s_ramAddr,
-			writedata_i => s_ramWrtData,
-			readmem_i => s_isLoad,
-			writemem_i => s_isStore,
+			address_i => ramAddr,
+			writedata_i => ramWrtData,
+			readmem_i => ramLoad,
+			writemem_i => ramStore,
 			readdata_o => s_ramData);
 
 
 	NYU_ROM : ROM
 		port map(
-			address_i => s_romAddr,       
+			address_i => s_nextPC_romAddr,       
 			data_o => s_romData);
 
 	NYU_datapath : datapath
 		port map(
-			clk => clk,
+			clk => cpu_clk,
 			clr => clr,
 			rom_i => s_romData,
 			ram_i => s_ramData,
@@ -100,14 +115,32 @@ begin
 			wrtEnble_i => s_wrtEnble,
 			isItype_i => s_isItype,
 			isLoad_i => s_isLoad,
-			isJump_i => s_isJtype,          
-			PC_o => s_romAddr,
+			isJump_i => s_isJtype,
+			isHalt_i => s_halt, 			
+			PC_o => s_nextPC_romAddr,
 			opCode_o => s_Opcode,
 			writeram_o => s_ramWrtData,
 			address_o => s_ramAddr);
 
-
-
-pc_o <= s_romAddr;
+cpu_clk <= clk when state = ST_RUNNING else
+				'0';
+				
+ramLoad	<= '1' when state = ST_HALT else
+				 s_isLoad;
+				 
+ramStore <= '1' when state = ST_IDLE else
+				 s_isStore;
+				 
+ramAddr <= s_ramAddr when state = ST_RUNNING else
+				inputRamAddr;
+				
+ramWrtData <= inputRamWrtData when state = ST_IDLE else
+				 s_ramWrtData;
+				 
+ramData <= s_ramData; 				 
+				
+halt <= s_halt;
+				 
+pc_o <= s_nextPC_romAddr;
 end Behavioral;
 

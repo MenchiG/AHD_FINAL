@@ -43,7 +43,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 package  NYU_P is   
 
 
-
+		TYPE CPUStateType is (ST_IDLE, ST_RUNNING, ST_HALT);
 
 		constant  R_TypeInstr  : std_logic_vector(5 downto 0) := "000000";
 		constant  ADDI         : std_logic_vector(5 downto 0) := "000001";
@@ -67,7 +67,19 @@ package  NYU_P is
 		constant AOR 	:std_logic_vector(2 downto 0) := "011";	
 		constant ANOR	:std_logic_vector(2 downto 0) := "100";
 		
-		
+	COMPONENT NYU_TOP
+	PORT(
+		clk : IN std_logic;
+		clr : IN std_logic;
+		state : IN CPUStateType;
+		inputRamAddr : IN std_logic_vector(31 downto 0);
+		inputRamWrtData : IN std_logic_vector(31 downto 0);          
+		ramData : OUT std_logic_vector(31 downto 0);
+		halt : OUT std_logic;
+		pc_o : OUT std_logic_vector(31 downto 0)
+		);
+	END COMPONENT;	
+	
 	COMPONENT register_file is
 	PORT(
 		RdReg1_i : IN std_logic_vector(4 downto 0);
@@ -104,7 +116,8 @@ package  NYU_P is
 		wrtEnble_i : IN std_logic;
 		isItype_i : IN std_logic;
 		isLoad_i : in  STD_LOGIC;
-		isJump_i : IN std_logic;          
+		isJump_i : IN std_logic;
+		isHalt_i : in  STD_LOGIC;		
 		PC_o : OUT std_logic_vector(31 downto 0);
 		opCode_o : OUT std_logic_vector(5 downto 0);
 		writeram_o : OUT std_logic_vector(31 downto 0);

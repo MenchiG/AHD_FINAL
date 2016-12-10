@@ -41,6 +41,7 @@ entity datapath is
 		   isItype_i : in  STD_LOGIC;
 		   isLoad_i : in  STD_LOGIC;
 		   isJump_i : in  STD_LOGIC;
+			isHalt_i : in  STD_LOGIC;
            PC_o : out  STD_LOGIC_VECTOR (31 downto 0);
            opCode_o : out  STD_LOGIC_VECTOR (5 downto 0);
            writeram_o : out  STD_LOGIC_VECTOR (31 downto 0);
@@ -134,7 +135,11 @@ begin
 		if clr = '1' then
 			   s_PC <= (others=>'0') ;
          elsif clk'event and clk = '1'then
-			   s_PC <= s_JumpPC;
+				if isHalt_i = '1' then
+					s_PC <= s_PC;
+				else
+					s_PC <= s_JumpPC;
+				end if;
          end if;
         end process;
 			
