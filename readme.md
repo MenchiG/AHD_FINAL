@@ -8,6 +8,6 @@ This project contains
 + Testbenches
 + RC5 asm codes
 + BIT FILE
++ DEMO Video
 
 Instead of using compiler, we compile asm code by hand.
-Due to the constraint of the file size, demo is not here, but it locates in NYU class.
